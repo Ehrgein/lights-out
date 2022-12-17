@@ -83,7 +83,6 @@ async function start() {
         }
     })
 
-    console.log(bajatension);
 
     await browser.close
 
