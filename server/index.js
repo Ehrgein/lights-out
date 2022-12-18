@@ -5,7 +5,8 @@ import dotenv from "dotenv";
 import dbRoutes from "./routes/db.js";
 import BajaEdesur from "./models/edesurbaja.js";
 import MediaEdesur from "./models/edesurmedia.js";
-import FullEdesur from "./models/edesurmedia.js";
+import ProgramadosEdesur from "./models/edesurprogramados.js";
+import e from "express";
 
 dotenv.config();
 // user: alek pwd: mongo
@@ -102,6 +103,63 @@ const scrapeEdesur = async () => {
     timeZone: "America/Argentina/Buenos_Aires",
   });
 
+  const cortesprogramadospartido = await page.evaluate(() => {
+    let partido = [
+      ...document.querySelectorAll(
+        "#CortesProgramados > tbody > tr > td:nth-child(1)"
+      ),
+    ].map((x) => x.innerHTML);
+    return partido;
+  });
+
+  const cortesprogramadoslocalidad = await page.evaluate(() => {
+    let localidad = [
+      ...document.querySelectorAll(
+        "#CortesProgramados > tbody > tr > td:nth-child(2)"
+      ),
+    ].map((x) => x.innerHTML);
+    return localidad;
+  });
+
+  const cortesprogramadosalimentador = await page.evaluate(() => {
+    let alimentador = [
+      ...document.querySelectorAll(
+        "#CortesProgramados > tbody > tr > td:nth-child(3)"
+      ),
+    ].map((x) => x.innerHTML);
+    return alimentador;
+  });
+
+  const cortesprogramadosafectados = await page.evaluate(() => {
+    let afectados = [
+      ...document.querySelectorAll(
+        "#CortesProgramados > tbody > tr > td:nth-child(4)"
+      ),
+    ].map((x) => x.innerHTML);
+    return afectados;
+  });
+
+  const cortesprogramadoseta = await page.evaluate(() => {
+    let eta = [
+      ...document.querySelectorAll(
+        "#CortesProgramados > tbody > tr > td:nth-child(5)"
+      ),
+    ].map((x) => x.innerHTML);
+    return eta;
+  });
+
+  const cortesprogramados = cortesprogramadospartido.map((x, index) => {
+    return {
+      partido: x,
+      localidad: cortesprogramadoslocalidad[index],
+      alimentador: cortesprogramadosalimentador[index],
+      afectados: cortesprogramadosafectados[index],
+      eta: cortesprogramadoseta[index],
+      tiempo: date,
+      time: date,
+    };
+  });
+
   const bajatension = partidosbaja.map((x, index) => {
     return {
       partido: x,
@@ -122,12 +180,9 @@ const scrapeEdesur = async () => {
       eta: etamedia[index],
     };
   });
-
-  console.log(date);
-
   browser.close;
 
-  return { bajatension, mediatension };
+  return { bajatension, mediatension, cortesprogramados };
 };
 
 const data = await scrapeEdesur();
@@ -136,37 +191,46 @@ app.get("/", (req, res) => {
   res.send(data);
 });
 
+console.log(data.cortesprogramados);
+
 // Inserting many documents into schema
 
-BajaEdesur.insertMany(data.bajatension)
-  .then(function () {
-    console.log("Data inserted"); // Success
-  })
-  .catch(function (err) {
-    console.log(err);
-  });
+if (data.cortesprogramados[0].afectados != undefined) {
+  ProgramadosEdesur.insertMany(data.cortesprogramados)
+    .then(function () {
+      console.log("Data insertada en cortes programados"); // Success
+    })
+    .catch(function (err) {
+      console.log(err);
+    });
+} else {
+  console.log("Data no insertada en cortes programados");
+}
 
-MediaEdesur.insertMany(data.mediatension)
-  .then(function () {
-    console.log("Data inserted"); // Success
-  })
-  .catch(function (err) {
-    console.log(err);
-  });
+if (data.bajatension[0].afectados != undefined) {
+  BajaEdesur.insertMany(data.bajatension)
+    .then(function () {
+      console.log("Data insertada en baja tension"); // Success
+    })
+    .catch(function (err) {
+      console.log(err);
+    });
+} else {
+  console.log("Data no insertada en baja tension");
+}
 
-// FullEdesur.insertMany(data)
-//   .then(function () {
-//     console.log("Data Inserted in New Full Schema"); // Success
-//   })
-//   .catch(function (err) {
-//     console.log(err);
-//   });
-
-// Inserts the data in our mongoDB database
-// await testingdata.save();
+if (data.mediatension[0].afectados != undefined) {
+  MediaEdesur.insertMany(data.mediatension)
+    .then(function () {
+      console.log("Data insertada en media tension"); // Success
+    })
+    .catch(function (err) {
+      console.log(err);
+    });
+} else {
+  console.log("Data no insertada en media tension");
+}
 
 const findData = await BajaEdesur.findOne({});
-
-console.log(findData);
 
 export default data;

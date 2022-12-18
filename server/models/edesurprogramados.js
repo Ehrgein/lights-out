@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const { Schema, model } = mongoose;
 
-const MediaEdesurSchema = new Schema({
+const ProgramadosEdesurSchema = new Schema({
   partido: {
     type: String,
     required: false,
@@ -30,6 +30,6 @@ const MediaEdesurSchema = new Schema({
 
 });
 
-const MediaEdesur = model("MediaEdesur", MediaEdesurSchema);
+const ProgramadosEdesur = model("ProgramadosEdesur", ProgramadosEdesurSchema);
 
-export default MediaEdesur;
+export default ProgramadosEdesur;
