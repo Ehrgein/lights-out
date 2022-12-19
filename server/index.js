@@ -6,7 +6,7 @@ import dbRoutes from "./routes/db.js";
 import BajaEdesur from "./models/edesurbaja.js";
 import MediaEdesur from "./models/edesurmedia.js";
 import ProgramadosEdesur from "./models/edesurprogramados.js";
-import e from "express";
+import cors from "cors";
 
 dotenv.config();
 // user: alek pwd: mongo
@@ -17,6 +17,14 @@ const port = process.env.PORT || 9000;
 // middleware
 app.use("/api", dbRoutes);
 app.use(express.json());
+
+app.use(
+  cors({
+    credentials: true,
+    origin: "http://127.0.0.1:5173",
+    methods: ["GET", "POST"],
+  })
+);
 
 app.listen(port, () => console.log("Server listening on port", port));
 

@@ -1,19 +1,27 @@
-import { useState } from 'react'
-import Data from './components/Data'
-import bajatension from '../index.js'
-
-
+import { useEffect, useState } from "react";
+import Data from "./components/Data";
 
 function App() {
+  const [data, setData] = useState();
 
-console.log(bajatension)
+  const getEdesurData = async () => {
+    const response = await fetch("http://localhost:9000").then((response) =>
+      response.json()
+    );
+    setData(response);
+  };
 
+  useEffect(() => {
+    getEdesurData();
+  }, []);
+
+  console.log(data);
 
   return (
     <div className="App">
-      <Data/>
+      <Data />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
