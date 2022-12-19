@@ -19,7 +19,14 @@ function App() {
 
   return (
     <div className="App">
-      <Data />
+      <div>
+        {data?.bajatension.map((item) => (
+          <div className="flex justify-center items-center">
+            <span className="text-white px-2">{item.partido}</span>
+            <span className="text-white"> {item.afectados}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
